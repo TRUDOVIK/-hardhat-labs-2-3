@@ -12,6 +12,8 @@ contract Token {
     uint256 private totalSupply;
 
     mapping(address => uint256) private balances;
+    event Transfer(address indexed from, address indexed to, uint256 value);
+
 
     /**
      * @param _totalSupply total supply to ever exist.
@@ -30,6 +32,12 @@ contract Token {
         require(balances[msg.sender] >= _amount, "Not enough funds");
         balances[msg.sender] -= _amount;
         balances[_to] += _amount;
+    }
+
+        function mint(address receiver, uint256 amount) external {
+        require(msg.sender == owner, "Only minter can call this function");
+        balances[receiver] += amount;
+        emit Transfer(address(0), receiver, amount);
     }
 
     /**
