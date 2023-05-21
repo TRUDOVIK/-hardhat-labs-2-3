@@ -5,56 +5,30 @@ pragma solidity >=0.8.0 <0.9.0;
  * @title Token - a simple example
  */
 contract Token {
-    address private owner;
-
-    string public constant name = "Token";
-
-    uint256 private totalSupply;
-
-    mapping(address => uint256) private balances;
-    event Transfer(address indexed from, address indexed to, uint256 value);
-
-
-    /**
-     * @param _totalSupply total supply to ever exist.
-     */
-    constructor(uint256 _totalSupply) {
-        owner = msg.sender;
-        totalSupply = _totalSupply;
-        balances[owner] += totalSupply;
+    struct Info {
+        string ownerName;
+        uint age;
+        uint balance;
     }
-
-    /**
-     * @param _amount amount to transfer. Needs to be less than balances of the msg.sender.
-     * @param _to address receiver.
-     */
-    function transfer(uint256 _amount, address _to) external {
-        require(balances[msg.sender] >= _amount, "Not enough funds");
-        balances[msg.sender] -= _amount;
-        balances[_to] += _amount;
+    
+    mapping(bytes32 => Info) public personalInfo;
+    
+    event OwnerInformationAdded(bytes32 indexed key, string ownerName, uint age, uint balance);
+    event OwnerInformationRemoved(bytes32 indexed key);
+    
+    function addOwnerInformation(bytes32 _key, string memory _name, uint _age, uint _balance) public {
+        Info memory newInfo = Info(_name, _age, _balance);
+        personalInfo[_key] = newInfo;
+        emit OwnerInformationAdded(_key, _name, _age, _balance);
     }
-
-        function mint(address receiver, uint256 amount) external {
-        require(msg.sender == owner, "Only minter can call this function");
-        balances[receiver] += amount;
-        emit Transfer(address(0), receiver, amount);
+    
+    function removeOwnerInformation(bytes32 _key) public {
+        delete personalInfo[_key];
+        emit OwnerInformationRemoved(_key);
     }
-
-    /**
-     * @param _address address to view the balance.
-     */
-    function balanceOf(address _address)
-        external
-        view
-        returns (uint256 result)
-    {
-        result = balances[_address];
-    }
-
-    /**
-     * @notice returns the total supply.
-     */
-    function getTotalSupply() external view returns (uint256 _totalSupply) {
-        _totalSupply = totalSupply;
+    
+    function getOwnerInformation(bytes32 _key) public view returns (string memory, uint, uint) {
+        Info memory info = personalInfo[_key];
+        return (info.ownerName, info.age, info.balance);
     }
 }
